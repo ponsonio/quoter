@@ -1,0 +1,77 @@
+
+rule CheckDownPayment "Less that 500k, min is 5%" salience 10 {
+    when
+        Calc.TotalPropertyValue < 500000 && Calc.CheckDownPayment/Calc.TotalPropertyValue < 0.05
+    then
+        Calc.Valid = False
+        Calc.AddError("Minimum Down Payment is 5%, for properties less than 500000")
+        Retract("CheckDownPayment");
+}
+
+rule CheckDownPayment2nd "Between 500k and 1M, requires 10%" salience 10 {
+    when
+        Calc.TotalPropertyValue < 1000000 && Calc.TotalPropertyValue > 500000  && Calc.CheckDownPayment/Calc.TotalPropertyValue < 0.10
+    then
+        Calc.Valid = False
+        Calc.AddError("Minimum Down Payment is 10%, for properties over 500000")
+        Retract("CheckDownPayment2nd");
+}
+
+rule RequiresCMHC "Check if Requires CMHC" salience 10 {
+    when
+        Calc.TotalPropertyValue < 1000000  && Calc.CheckDownPayment/Calc.TotalPropertyValue >= 0.05 && Calc.CheckDownPayment/Calc.TotalPropertyValue < 0.20
+    then
+        Calc.RequiresCMHC = true;
+        Retract("RequiresCMHC");
+}
+
+rule CheckMaxPeriodWithCMHC "Check if Requires CMHC" salience 9 {
+    when
+        Calc.RequiresCMHC == true  && Calc.AmortizationPeriod > 25
+    then
+        Calc.Valid = False
+        Calc.AddError("MaxPeriod with CMHC (down pay less that 20%) is 25 yrs")
+        Retract("CheckMaxPeriodWithCMHC");
+}
+
+rule CheckDownPaymentBigMansion "Check if DP is enough for BigMansion" salience 10 {
+    when
+        Calc.TotalPropertyValue > 1000000  && Calc.CheckDownPayment/Calc.TotalPropertyValue < 0.20
+    then
+        Calc.Valid = False
+        Calc.AddError("DownPayment should be at least 20% for a 1 Million property")
+        Retract("CheckDownPaymentBigMansion");
+}
+
+rule CheckPeriod "Check if period it's ok" salience 10 {
+    when
+        Calc.AmortizationPeriod < 5 || Calc.AmortizationPeriod > 30
+    then
+        Calc.Valid = false
+        Calc.AddError("AmortizationPeriod must be between 5 and 30 years")
+        Retract("CheckPeriod");
+}
+
+rule SetCMHCLayer1 "Determine CMHC first layer" salience 8 {
+    when
+        Calc.Valid == true && Calc.CheckDownPayment/Calc.TotalPropertyValue <= 0.15 && Calc.CheckDownPayment/Calc.TotalPropertyValue < 0.20
+    then
+        Calc.CMHC = 2.8
+        Retract("SetCMHCLayer1");
+}
+
+rule SetCMHCLayer2 "Determine CMHC second layer" salience 8 {
+    when
+        Calc.Valid == true && Calc.CheckDownPayment/Calc.TotalPropertyValue >= 0.10 && Calc.CheckDownPayment/Calc.TotalPropertyValue > 0.15
+    then
+        Calc.CMHC = 3.1
+        Retract("SetCMHCLayer2");
+}
+
+rule SetCMHCLayer3 "Determine CMHC second layer" salience 8 {
+    when
+        Calc.Valid == true && Calc.CheckDownPayment/Calc.TotalPropertyValue >= 0.05 %% Calc.CheckDownPayment/Calc.TotalPropertyValue <= 0.10
+    then
+        Calc.CMHC = 4.00
+        Retract("SetCMHCLayer3");
+}
