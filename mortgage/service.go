@@ -9,6 +9,8 @@ import (
 	"math"
 )
 
+// CalculatorService
+//using an interface here, will allow to change the implementation (if you don't like the rule stuff)
 type CalculatorService interface {
 	Execute(mortgageCalc *Calc) error
 }
@@ -64,6 +66,8 @@ func (srv *calculatorServiceRules) Execute(mortgageCalc *Calc) error {
 	return nil
 }
 
+// Even the engine is capable of executing the calculations, code was preferred just because it's easy to debug and
+// understand, console log are left intentionally just to trace easy
 func calculatePaymentPerSchedule(c *Calc) float64 {
 	p := c.TotalPropertyValue - c.DownPayment + c.CMHCAmount
 	fmt.Printf("principal:%v\n", p)

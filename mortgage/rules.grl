@@ -63,17 +63,17 @@ rule CheckPeriod "Check if period it's ok" salience 10 {
 
 rule SetCMHCLayer1 "Determine CMHC first layer" salience 8 {
     when
-        Calc.Valid == true && Calc.RequiresCMHC == true && Calc.DownPayment/Calc.TotalPropertyValue <= 0.15 && Calc.DownPayment/Calc.TotalPropertyValue < 0.20
+        Calc.Valid == true && Calc.RequiresCMHC == true && Calc.DownPayment/Calc.TotalPropertyValue >= 0.15 && Calc.DownPayment/Calc.TotalPropertyValue < 0.20
     then
-        Calc.CMHCRate = 2.8;
+        Calc.CMHCRate = 0.028;
         Retract("SetCMHCLayer1");
 }
 
 rule SetCMHCLayer2 "Determine CMHC second layer" salience 8 {
     when
-        Calc.Valid == true && Calc.RequiresCMHC == true && Calc.DownPayment/Calc.TotalPropertyValue >= 0.10 && Calc.DownPayment/Calc.TotalPropertyValue > 0.15
+        Calc.Valid == true && Calc.RequiresCMHC == true && Calc.DownPayment/Calc.TotalPropertyValue >= 0.10 && Calc.DownPayment/Calc.TotalPropertyValue < 0.15
     then
-        Calc.CMHCRate = 3.1;
+        Calc.CMHCRate = 0.031;
         Retract("SetCMHCLayer2");
 }
 
@@ -81,7 +81,7 @@ rule SetCMHCLayer3 "Determine CMHC second layer" salience 8 {
     when
         Calc.Valid == true && Calc.RequiresCMHC == true && Calc.DownPayment/Calc.TotalPropertyValue >= 0.05 && Calc.DownPayment/Calc.TotalPropertyValue <= 0.10
     then
-        Calc.CMHCRate = 4.00;
+        Calc.CMHCRate = 0.04;
         Retract("SetCMHCLayer3");
 }
 

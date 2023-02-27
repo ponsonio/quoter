@@ -55,7 +55,11 @@ func (a *api) calculate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(calc)
+	resErr := json.NewEncoder(w).Encode(calc)
+	if resErr != nil {
+		http.Error(w, resErr.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func (a *api) Router() http.Handler {

@@ -81,6 +81,17 @@ func TestValidations(t *testing.T) {
 			},
 			ExpectedError: "Minimum Down Payment is 5%, for properties less than 500000",
 		},
+		{
+			Name: "Min DP is 10%",
+			Calc: &Calc{
+				TotalPropertyValue:      500001.00,
+				AnualInterestRate:       0.06,
+				PaymentsPerMonth:        1,
+				AmortizationPeriodYears: 5,
+				DownPayment:             50000,
+			},
+			ExpectedError: "Minimum Down Payment is 10%, for properties between 500,000 and 1,000, 000",
+		},
 	}
 	for _, input := range tc {
 		err := service.Execute(input.Calc)
