@@ -1,25 +1,43 @@
 
-rule CheckDownPayment "Less that 500k, min is 5%" salience 10 {
+rule CheckInterestRate "Valid Interest Rate" salience 10 {
     when
-        Calc.TotalPropertyValue < 500000 && Calc.CheckDownPayment/Calc.TotalPropertyValue < 0.05
+        Calc.AnualInterestRate <= 0.00
     then
-        Calc.Valid = False
-        Calc.AddError("Minimum Down Payment is 5%, for properties less than 500000")
-        Retract("CheckDownPayment");
+        Calc.Valid = false;
+        Calc.AddError("Interest Rate must be more than 0.00");
+        Retract("CheckInterestRate");
 }
 
-rule CheckDownPayment2nd "Between 500k and 1M, requires 10%" salience 10 {
+rule CheckDownPayment1stLayer "Less that 500k, min is 5%" salience 10 {
     when
-        Calc.TotalPropertyValue < 1000000 && Calc.TotalPropertyValue > 500000  && Calc.CheckDownPayment/Calc.TotalPropertyValue < 0.10
+        Calc.TotalPropertyValue <= 500000 && Calc.DownPayment/Calc.TotalPropertyValue < 0.05
     then
-        Calc.Valid = False
-        Calc.AddError("Minimum Down Payment is 10%, for properties over 500000")
-        Retract("CheckDownPayment2nd");
+        Calc.Valid = false;
+        Calc.AddError("Minimum Down Payment is 5%, for properties less than 500000");
+        Retract("CheckDownPayment1stLayer");
+}
+
+rule CheckDownPayment2ndLayer "Between 500k and 1M, requires 10%" salience 10 {
+    when
+        Calc.TotalPropertyValue > 500000 && Calc.TotalPropertyValue <= 1000000 && Calc.DownPayment/Calc.TotalPropertyValue < 0.10
+    then
+        Calc.Valid = false;
+        Calc.AddError("Minimum Down Payment is 10%, for properties between 500,000 and 1,000, 000");
+        Retract("CheckDownPayment2ndLayer");
+}
+
+rule CheckDownPayment3rdLayer "Mare than 1M, requires 10%" salience 10 {
+    when
+        Calc.TotalPropertyValue > 1000000  && Calc.DownPayment/Calc.TotalPropertyValue < 0.20
+    then
+        Calc.Valid = false;
+        Calc.AddError("DownPayment should be at least 20% for a 1,000,000 property");
+        Retract("CheckDownPayment3rdLayer");
 }
 
 rule RequiresCMHC "Check if Requires CMHC" salience 10 {
     when
-        Calc.TotalPropertyValue < 1000000  && Calc.CheckDownPayment/Calc.TotalPropertyValue >= 0.05 && Calc.CheckDownPayment/Calc.TotalPropertyValue < 0.20
+        Calc.TotalPropertyValue < 1000000 && Calc.DownPayment/Calc.TotalPropertyValue >= 0.05 && Calc.DownPayment/Calc.TotalPropertyValue < 0.20
     then
         Calc.RequiresCMHC = true;
         Retract("RequiresCMHC");
@@ -27,51 +45,52 @@ rule RequiresCMHC "Check if Requires CMHC" salience 10 {
 
 rule CheckMaxPeriodWithCMHC "Check if Requires CMHC" salience 9 {
     when
-        Calc.RequiresCMHC == true  && Calc.AmortizationPeriod > 25
+        Calc.RequiresCMHC == true && Calc.AmortizationPeriodYears > 25
     then
-        Calc.Valid = False
-        Calc.AddError("MaxPeriod with CMHC (down pay less that 20%) is 25 yrs")
+        Calc.Valid = false;
+        Calc.AddError("MaxPeriod with CMHC (down pay less that 20%) is 25 yrs");
         Retract("CheckMaxPeriodWithCMHC");
-}
-
-rule CheckDownPaymentBigMansion "Check if DP is enough for BigMansion" salience 10 {
-    when
-        Calc.TotalPropertyValue > 1000000  && Calc.CheckDownPayment/Calc.TotalPropertyValue < 0.20
-    then
-        Calc.Valid = False
-        Calc.AddError("DownPayment should be at least 20% for a 1 Million property")
-        Retract("CheckDownPaymentBigMansion");
 }
 
 rule CheckPeriod "Check if period it's ok" salience 10 {
     when
-        Calc.AmortizationPeriod < 5 || Calc.AmortizationPeriod > 30
+        Calc.AmortizationPeriodYears < 5 || Calc.AmortizationPeriodYears > 30
     then
-        Calc.Valid = false
-        Calc.AddError("AmortizationPeriod must be between 5 and 30 years")
+        Calc.Valid = false;
+        Calc.AddError("AmortizationPeriod must be between 5 and 30 years");
         Retract("CheckPeriod");
 }
 
 rule SetCMHCLayer1 "Determine CMHC first layer" salience 8 {
     when
-        Calc.Valid == true && Calc.CheckDownPayment/Calc.TotalPropertyValue <= 0.15 && Calc.CheckDownPayment/Calc.TotalPropertyValue < 0.20
+        Calc.Valid == true && Calc.RequiresCMHC == true && Calc.DownPayment/Calc.TotalPropertyValue <= 0.15 && Calc.DownPayment/Calc.TotalPropertyValue < 0.20
     then
-        Calc.CMHC = 2.8
+        Calc.CMHCRate = 2.8;
         Retract("SetCMHCLayer1");
 }
 
 rule SetCMHCLayer2 "Determine CMHC second layer" salience 8 {
     when
-        Calc.Valid == true && Calc.CheckDownPayment/Calc.TotalPropertyValue >= 0.10 && Calc.CheckDownPayment/Calc.TotalPropertyValue > 0.15
+        Calc.Valid == true && Calc.RequiresCMHC == true && Calc.DownPayment/Calc.TotalPropertyValue >= 0.10 && Calc.DownPayment/Calc.TotalPropertyValue > 0.15
     then
-        Calc.CMHC = 3.1
+        Calc.CMHCRate = 3.1;
         Retract("SetCMHCLayer2");
 }
 
 rule SetCMHCLayer3 "Determine CMHC second layer" salience 8 {
     when
-        Calc.Valid == true && Calc.CheckDownPayment/Calc.TotalPropertyValue >= 0.05 %% Calc.CheckDownPayment/Calc.TotalPropertyValue <= 0.10
+        Calc.Valid == true && Calc.RequiresCMHC == true && Calc.DownPayment/Calc.TotalPropertyValue >= 0.05 && Calc.DownPayment/Calc.TotalPropertyValue <= 0.10
     then
-        Calc.CMHC = 4.00
+        Calc.CMHCRate = 4.00;
         Retract("SetCMHCLayer3");
 }
+
+rule CalcCMHC "Calc CMHC" salience 7 {
+    when
+        Calc.RequiresCMHC == true
+    then
+        Calc.CMHCAmount = (Calc.TotalPropertyValue-Calc.DownPayment)*Calc.CMHCRate;
+        Retract("CalcCMHC");
+}
+
+

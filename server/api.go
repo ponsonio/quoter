@@ -6,6 +6,7 @@ import (
 	"github.com/ponsonio/quoter/mortgage"
 	"io"
 	"net/http"
+	"strings"
 )
 
 type api struct {
@@ -36,9 +37,23 @@ func (a *api) calculate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	reqBody, _ := io.ReadAll(r.Body)
 	var calc mortgage.Calc
-	json.Unmarshal(reqBody, &calc)
+	marErr := json.Unmarshal(reqBody, &calc)
 
-	(*a.CalculatorService).Execute(&calc)
+	if marErr != nil {
+		http.Error(w, marErr.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	valErr := (*a.CalculatorService).Execute(&calc)
+	if valErr != nil {
+		http.Error(w, valErr.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !calc.Valid {
+		http.Error(w, strings.Join(calc.Errors, " , "), http.StatusBadRequest)
+		return
+	}
 
 	json.NewEncoder(w).Encode(calc)
 }

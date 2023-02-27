@@ -9,7 +9,7 @@ import (
 
 func main() {
 	//this allows to inject a mock or replace the implementation
-	calculatorService := mortgage.NewCalculatorService()
+	calculatorService := mortgage.NewCalculatorService("./mortgage/rules.grl")
 	s := server.NewServer(&calculatorService)
 	log.Fatal(http.ListenAndServe(":8080", s.Router()))
 }
