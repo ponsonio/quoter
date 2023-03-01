@@ -18,7 +18,7 @@ Due time constraints, the following aspect where not implemented, but it does me
 4. Only "British Columbia Mortgage Default Insurance Rates", has been considered 
 5. Validations, not all validations are in place 
 6. Integration test (direct http calls to the api), are neglected due time constraint, still those are necessary, UI automated test follow the same. 
-7. Calculations has not been exhaustive compared with "real life" examples.
+7. Calculation has not been exhaustive compared with "real life" examples.
 
 ## Running Locally
 
