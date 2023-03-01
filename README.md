@@ -16,7 +16,7 @@ Due time constraints, the following aspect where not implemented, but it does me
 2. Security
 3. Automated test are not exhaustive, but test included shows the implementation proposal for unit test.
 4. Only "British Columbia Mortgage Default Insurance Rates", has been considered 
-5.-Validations, not all validations are in place 
+5. Validations, not all validations are in place 
 6. Integration test (direct http calls to the api), are neglected due time constraint, still those are necessary, UI automated test follow the same. 
 7. Calculations has not been exhaustive compared with "real life" examples.
 
