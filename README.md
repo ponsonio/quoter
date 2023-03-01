@@ -1,6 +1,6 @@
 # quoter-test
 
-##Design Considerations
+## Design Considerations
 The present implementation uses a rule engine library, as this seems to fit in the proposed scenario
 where rules correspond to laws, direct business directives and seems to be likely to change over time. 
 
@@ -9,7 +9,7 @@ As an advantages we can state:
 * Business Rules are separated from code and easy to read and understand by an SME
 * Easy to maintain and understand that a "code" implementation 
 
-#ToDo
+# ToDos
 Due time constraints, the following aspect where not implemented, but it does mean those are less on not important;
 
 1. Logging
@@ -20,7 +20,7 @@ Due time constraints, the following aspect where not implemented, but it does me
 6. Integration test (direct http calls to the api), are neglected due time constraint, still those are necessary, UI automated test follow the same.
 7.- Calculations has not been exhaustive compared with "real life" examples.
 
-##Running Locally
+## Running Locally
 
 Code can be executed using:
 ````
@@ -32,7 +32,7 @@ To create a request to the back end any http client tool can be use, in this cas
 
 ![img.png](img.png)
 
-##Test
+## Test
 
 Tests can be run using:
 
@@ -40,7 +40,7 @@ Tests can be run using:
 go test ./...
 ````
 
-##UI
+## UI
 UI it's pretty fragile, and it's finally it's just a demo
 client, it's recommended to use defaults values at first , to validate system it's working.
 
