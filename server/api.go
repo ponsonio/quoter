@@ -6,7 +6,6 @@ import (
 	"github.com/ponsonio/quoter/mortgage"
 	"io"
 	"net/http"
-	"strings"
 )
 
 type api struct {
@@ -32,7 +31,12 @@ func NewServer(calculatorService *mortgage.CalculatorService) Server {
 	return a
 }
 
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
+
 func (a *api) calculate(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 
 	w.Header().Set("Content-Type", "application/json")
 	reqBody, _ := io.ReadAll(r.Body)
@@ -51,8 +55,9 @@ func (a *api) calculate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !calc.Valid {
-		http.Error(w, strings.Join(calc.Errors, " , "), http.StatusBadRequest)
-		return
+		calc = mortgage.Calc{
+			Errors: calc.Errors,
+		}
 	}
 
 	resErr := json.NewEncoder(w).Encode(calc)
